@@ -11,12 +11,6 @@
     <ClCompile Include="..\..\dependencies\xraw3D\dependencies\xcore\src\xcore.cpp">
       <Filter>Dependencies\xcore</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\dependencies\xraw3D\dependencies\xcore\src\xcore_profiler_1.cpp">
-      <Filter>Dependencies\xcore</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\dependencies\xraw3D\dependencies\xcore\src\xcore_profiler_2.cpp">
-      <Filter>Dependencies\xcore</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\dependencies\xraw3D\src\xraw3d.cpp">
       <Filter>Dependencies\xraw3D</Filter>
     </ClCompile>
@@ -308,6 +302,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\dependencies\xraw3D\dependencies\assimp\BINARIES\Win32\bin\Release\assimp-vc142-mt.dll" />
+    <CustomBuild Include="..\..\dependencies\xraw3D\dependencies\assimp\BINARIES\Win32\bin\Release\assimp-vc143-mt.dll" />
   </ItemGroup>
 </Project>
