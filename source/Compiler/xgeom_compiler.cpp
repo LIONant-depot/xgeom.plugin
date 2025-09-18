@@ -1,7 +1,14 @@
+#include "xgeom_compiler.h"
 
-#include "xraw3d.h"
-#include "../../dependencies/meshoptimizer/src/meshoptimizer.h"
-#include "../../src_runtime/xgeom.h"
+#include <dependencies/xcontainer/source/xcontainer_lockless_pool.h>
+
+#include "dependencies/xraw3d/source/xraw3d.h"
+#include "dependencies/meshoptimizer/src/meshoptimizer.h"
+#include "dependencies/xbitmap/source/xcolor.h"
+#include "dependencies/xbits/source/xbits.h"
+
+#include "../xgeom_rsc_descriptor.h"
+#include "../xgeom.h"
 
 namespace xgeom_compiler
 {
@@ -15,12 +22,12 @@ namespace xgeom_compiler
                 float           m_Weight;
             };
 
-            xcore::vector3d                 m_Position;
-            std::array<xcore::vector2, 4>   m_UVs;
-            xcore::icolor                   m_Color;
-            xcore::vector3d                 m_Normal;
-            xcore::vector3d                 m_Tangent;
-            xcore::vector3d                 m_Binormal;
+            xmath::fvec3                    m_Position;
+            std::array<xmath::fvec2, 4>     m_UVs;
+            xcolori                         m_Color;
+            xmath::fvec3                    m_Normal;
+            xmath::fvec3                    m_Tangent;
+            xmath::fvec3                    m_Binormal;
             std::array<weight, 4>           m_Weights;
         };
 
@@ -54,11 +61,11 @@ namespace xgeom_compiler
             m_FinalGeom.Initialize();
         }
 
-        virtual void LoadRaw( const std::string_view Path ) override
+        void LoadRaw( const std::wstring_view Path )
         {
             try
             {
-                xraw3d::assimp::ImportAll(m_RawAnim, m_RawGeom, Path.data() );
+                xraw3d::assimp::ImportAll(m_RawAnim, m_RawGeom, xstrtool::To(Path).data() );
             }
             catch (std::runtime_error Error)
             {
@@ -66,7 +73,7 @@ namespace xgeom_compiler
             }
         }
 
-        void ConvertToCompilerMesh( const xgeom_compiler::descriptor& CompilerOption )
+        void ConvertToCompilerMesh( const xgeom_rsc::descriptor& CompilerOption )
         {
             for( auto& Mesh : m_RawGeom.m_Mesh )
             {
@@ -87,7 +94,7 @@ namespace xgeom_compiler
                 auto& Mesh = m_CompilerMesh[Face.m_iMesh];
 
                 // Make sure all faces are shorted by the mesh
-                xassert(Face.m_iMesh >= LastMesh);
+                assert(Face.m_iMesh >= LastMesh);
                 LastMesh = Face.m_iMesh;
 
                 // are we dealing with a new mesh? if so we need to reset the remap of the submesh
@@ -114,7 +121,7 @@ namespace xgeom_compiler
                 else
                 {
                     // Make sure that faces are shorted by materials
-                    xassert(CurMaterial >= Face.m_iMaterialInstance );
+                    assert(CurMaterial >= Face.m_iMaterialInstance );
                 }
 
                 auto& SubMesh = Mesh.m_SubMesh[MaterialToSubmesh[Face.m_iMaterialInstance]];
@@ -162,8 +169,8 @@ namespace xgeom_compiler
                         SubMesh.m_nWeights = std::max(SubMesh.m_nWeights , RawVert.m_nWeights );
                     }
 
-                    xassert( GeomToCompilerVertMesh[Face.m_iVertex[i]] >= 0 );
-                    xassert( GeomToCompilerVertMesh[Face.m_iVertex[i]] < m_RawGeom.m_Vertex.size() );
+                    assert( GeomToCompilerVertMesh[Face.m_iVertex[i]] >= 0 );
+                    assert( GeomToCompilerVertMesh[Face.m_iVertex[i]] < m_RawGeom.m_Vertex.size() );
                     SubMesh.m_Indices.push_back(GeomToCompilerVertMesh[Face.m_iVertex[i]]);
 
                     MinVert = std::min( MinVert, (int)Face.m_iVertex[i] );
@@ -172,7 +179,7 @@ namespace xgeom_compiler
             }
         }
 
-        void GenenateLODs( const xgeom_compiler::descriptor& CompilerOption )
+        void GenenateLODs( const xgeom_rsc::descriptor& CompilerOption )
         {
             if( CompilerOption.m_LOD.m_GenerateLODs == false ) return;
 
@@ -199,7 +206,7 @@ namespace xgeom_compiler
             }
         }
 
-        void optimizeFacesAndVerts( const xgeom_compiler::descriptor& CompilerOption )
+        void optimizeFacesAndVerts( const xgeom_rsc::descriptor& CompilerOption )
         {
             for( auto& M : m_CompilerMesh)
             {
@@ -218,7 +225,7 @@ namespace xgeom_compiler
             }
         }
 
-        void GenerateFinalMesh(const xgeom_compiler::descriptor& CompilerOption)
+        void GenerateFinalMesh(const xgeom_rsc::descriptor& CompilerOption)
         {
             std::vector<std::uint32_t>  Indices32;
             std::vector<vertex>         FinalVertex;
@@ -269,10 +276,14 @@ namespace xgeom_compiler
                         Indices32.push_back( std::uint32_t(Index + iBaseVertex) );
                     }
 
+                    // Initialize the bboxs 
+                    FinalMesh.m_BBox   = xmath::fbbox::fromIdentity();
+                    m_FinalGeom.m_BBox = xmath::fbbox::fromIdentity();
+
                     for( const auto& Verts : S.m_Vertex )
                     {
-                        FinalMesh.m_BBox.AddVerts( &Verts.m_Position, 1 );
-                        m_FinalGeom.m_BBox.AddVerts( &Verts.m_Position, 1 );
+                        FinalMesh.m_BBox.AddVerts  ({&Verts.m_Position, 1});
+                        m_FinalGeom.m_BBox.AddVerts({&Verts.m_Position, 1});
                         FinalVertex.push_back(Verts);
                     }
                 }
@@ -426,7 +437,7 @@ namespace xgeom_compiler
                     Stream.m_ElementsType.m_bUVs        = true;
                     Stream.m_iStream                    = m_FinalGeom.m_nStreams;
 
-                    Stream.m_Offset = xcore::bits::Align(Stream.m_Offset, alignof(float));
+                    Stream.m_Offset = xbits::Align(Stream.m_Offset, alignof(float));
                     MaxVertAligment = std::max(MaxVertAligment, alignof(float));
 
                     m_FinalGeom.m_nStreamInfos++;
@@ -456,8 +467,8 @@ namespace xgeom_compiler
                 Stream.m_ElementsType.m_bColor      = true;
                 Stream.m_iStream                    = m_FinalGeom.m_nStreams;
 
-                Stream.m_Offset = xcore::bits::Align(Stream.m_Offset, alignof(xcore::icolor));
-                MaxVertAligment = std::max(MaxVertAligment, alignof(xcore::icolor));
+                Stream.m_Offset = xbits::Align(Stream.m_Offset, alignof(xcolori));
+                MaxVertAligment = std::max(MaxVertAligment, alignof(xcolori));
 
                 m_FinalGeom.m_nStreamInfos++;
                 m_FinalGeom.m_StreamTypes.m_bColor = true;
@@ -487,7 +498,7 @@ namespace xgeom_compiler
                     Stream.m_ElementsType.m_bBoneWeights= true;
                     Stream.m_iStream                    = m_FinalGeom.m_nStreams;
 
-                    Stream.m_Offset = xcore::bits::Align(Stream.m_Offset, alignof(std::uint8_t));
+                    Stream.m_Offset = xbits::Align(Stream.m_Offset, alignof(std::uint8_t));
                     MaxVertAligment = std::max(MaxVertAligment, alignof(std::uint8_t));
                 }
                 else
@@ -499,7 +510,7 @@ namespace xgeom_compiler
                     Stream.m_ElementsType.m_bBoneWeights= true; 
                     Stream.m_iStream                    = m_FinalGeom.m_nStreams;
 
-                    Stream.m_Offset = xcore::bits::Align(Stream.m_Offset, alignof(float));
+                    Stream.m_Offset = xbits::Align(Stream.m_Offset, alignof(float));
                     MaxVertAligment = std::max(MaxVertAligment, alignof(float));
                 }
 
@@ -531,7 +542,7 @@ namespace xgeom_compiler
                     Stream.m_ElementsType.m_bBoneIndices= true;
                     Stream.m_iStream                    = m_FinalGeom.m_nStreams;
 
-                    Stream.m_Offset = xcore::bits::Align(Stream.m_Offset, alignof(std::uint8_t));
+                    Stream.m_Offset = xbits::Align(Stream.m_Offset, alignof(std::uint8_t));
                     MaxVertAligment = std::max(MaxVertAligment, alignof(std::uint8_t));
                 }
                 else
@@ -543,7 +554,7 @@ namespace xgeom_compiler
                     Stream.m_ElementsType.m_bBoneIndices= true;
                     Stream.m_iStream                    = m_FinalGeom.m_nStreams;
 
-                    Stream.m_Offset = xcore::bits::Align(Stream.m_Offset, alignof(std::uint16_t));
+                    Stream.m_Offset = xbits::Align(Stream.m_Offset, alignof(std::uint16_t));
                     MaxVertAligment = std::max(MaxVertAligment, alignof(std::uint16_t));
                 }
 
@@ -577,8 +588,8 @@ namespace xgeom_compiler
                     Stream.m_ElementsType.m_bBTNs       = true;
                     Stream.m_iStream                    = m_FinalGeom.m_nStreams;
 
-                    Stream.m_Offset = xcore::bits::Align(Stream.m_Offset, alignof(xcore::vector3d));
-                    MaxVertAligment = std::max( MaxVertAligment, alignof(xcore::vector3d) );
+                    Stream.m_Offset = xbits::Align(Stream.m_Offset, alignof(xmath::fvec3d));
+                    MaxVertAligment = std::max( MaxVertAligment, alignof(xmath::fvec3d) );
                 }
                 else
                 {
@@ -589,7 +600,7 @@ namespace xgeom_compiler
                     Stream.m_ElementsType.m_bBTNs       = true;
                     Stream.m_iStream                    = m_FinalGeom.m_nStreams;
 
-                    Stream.m_Offset = xcore::bits::Align(Stream.m_Offset, alignof(std::int8_t));
+                    Stream.m_Offset = xbits::Align(Stream.m_Offset, alignof(std::int8_t));
                     MaxVertAligment = std::max(MaxVertAligment, alignof(std::int8_t));
                 }
 
@@ -617,7 +628,7 @@ namespace xgeom_compiler
 
             m_FinalGeom.m_CompactedVertexSize = CompilerOption.m_Streams.m_UseElementStreams
                                                 ? std::uint8_t(0)
-                                                : std::uint8_t( xcore::bits::Align((std::uint32_t)m_FinalGeom.m_StreamInfo[m_FinalGeom.m_nStreamInfos - 1].m_Offset
+                                                : std::uint8_t( xbits::Align((std::uint32_t)m_FinalGeom.m_StreamInfo[m_FinalGeom.m_nStreamInfos - 1].m_Offset
                                                                                                 + m_FinalGeom.m_StreamInfo[m_FinalGeom.m_nStreamInfos - 1].getSize()
                                                                                                 , (int)MaxVertAligment ) );
             m_FinalGeom.m_nBones        = 0;
@@ -634,7 +645,7 @@ namespace xgeom_compiler
             {
                 if (i) m_FinalGeom.m_Stream[i] = m_FinalGeom.m_DataSize;
                 const auto Size = m_FinalGeom.getStreamSize(i);
-                m_FinalGeom.m_DataSize = xcore::bits::Align(m_FinalGeom.m_DataSize + Size, max_aligment_v);
+                m_FinalGeom.m_DataSize = xbits::Align(m_FinalGeom.m_DataSize + Size, max_aligment_v);
             }
 
             m_FinalGeom.m_pData = new max_align_byte[m_FinalGeom.m_DataSize];
@@ -676,13 +687,13 @@ namespace xgeom_compiler
                 //
                 case xgeom::stream_info::element_def::position_mask_v:
                 {
-                    xassert(StreamInfo.getVectorElementSize() == 4);
+                    assert(StreamInfo.getVectorElementSize() == 4);
 
                     std::byte* pVertex = m_FinalGeom.getStreamInfoData(i);
                     auto       Stride  = m_FinalGeom.getStreamInfoStride(i);
                     for( auto i=0u; i< FinalVertex.size(); ++i )
                     {
-                        *((xcore::vector3d*)pVertex) =  FinalVertex[i].m_Position;
+                        *((xmath::fvec3d*)pVertex) =  FinalVertex[i].m_Position;
                         pVertex += Stride;
                     }
 
@@ -699,18 +710,18 @@ namespace xgeom_compiler
 
                     if( CompilerOption.m_Streams.m_bCompressBTN == false )
                     {
-                        xassert(StreamInfo.getVectorElementSize() == 4);
+                        assert(StreamInfo.getVectorElementSize() == 4);
                         for( auto i=0u; i< FinalVertex.size(); ++i )
                         {
-                            std::memcpy(&pVertex[0 * sizeof(xcore::vector3d)], &FinalVertex[i].m_Binormal, sizeof(xcore::vector3d));
-                            std::memcpy(&pVertex[1 * sizeof(xcore::vector3d)], &FinalVertex[i].m_Tangent,  sizeof(xcore::vector3d));
-                            std::memcpy(&pVertex[2 * sizeof(xcore::vector3d)], &FinalVertex[i].m_Normal,   sizeof(xcore::vector3d));
+                            std::memcpy(&pVertex[0 * sizeof(xmath::fvec3d)], &FinalVertex[i].m_Binormal, sizeof(xmath::fvec3d));
+                            std::memcpy(&pVertex[1 * sizeof(xmath::fvec3d)], &FinalVertex[i].m_Tangent,  sizeof(xmath::fvec3d));
+                            std::memcpy(&pVertex[2 * sizeof(xmath::fvec3d)], &FinalVertex[i].m_Normal,   sizeof(xmath::fvec3d));
                             pVertex += Stride;
                         }
                     }
                     else
                     {
-                        xassert(StreamInfo.getVectorElementSize() == 1);
+                        assert(StreamInfo.getVectorElementSize() == 1);
                         Stride -= 3*3;
                         for( auto i=0u; i< FinalVertex.size(); ++i )
                         {
@@ -738,7 +749,7 @@ namespace xgeom_compiler
                 //
                 case xgeom::stream_info::element_def::uv_mask_v:
                 {
-                    xassert(StreamInfo.getVectorElementSize() == 4);
+                    assert(StreamInfo.getVectorElementSize() == 4);
                     std::byte* pVertex = m_FinalGeom.getStreamInfoData(i);
                     auto       Stride = m_FinalGeom.getStreamInfoStride(i);
 
@@ -747,7 +758,7 @@ namespace xgeom_compiler
                         for( int j = 0, k = 0; j < UVDimensionCount; ++j )
                         {
                             if (CompilerOption.m_Cleanup.m_bRemoveUVs[j]) continue;
-                            std::memcpy(&pVertex[k*sizeof(xcore::vector2)], &FinalVertex[i].m_UVs[j], sizeof(xcore::vector2));
+                            std::memcpy(&pVertex[k*sizeof(xmath::fvec2)], &FinalVertex[i].m_UVs[j], sizeof(xmath::fvec2));
                             k++;
                         }
 
@@ -762,13 +773,13 @@ namespace xgeom_compiler
                 //
                 case xgeom::stream_info::element_def::color_mask_v:
                 {
-                    xassert(StreamInfo.getVectorElementSize() == 1);
+                    assert(StreamInfo.getVectorElementSize() == 1);
                     std::byte* pVertex = m_FinalGeom.getStreamInfoData(i);
                     auto       Stride = m_FinalGeom.getStreamInfoStride(i);
 
                     for( auto i = 0u; i < FinalVertex.size(); ++i )
                     {
-                        (*(xcore::icolor*)pVertex) = FinalVertex[i].m_Color;
+                        (*(xcolori*)pVertex) = FinalVertex[i].m_Color;
                         pVertex += Stride;
                     }
 
@@ -797,7 +808,7 @@ namespace xgeom_compiler
                     }
                     else
                     {
-                        xassert(StreamInfo.getVectorElementSize() == 4);
+                        assert(StreamInfo.getVectorElementSize() == 4);
                         for( auto i = 0u; i < FinalVertex.size(); ++i )
                         {
                             for (int j = 0; j < StreamInfo.m_VectorCount; ++j)
@@ -834,7 +845,7 @@ namespace xgeom_compiler
                     }
                     else
                     {
-                        xassert(StreamInfo.getVectorElementSize() == 2);
+                        assert(StreamInfo.getVectorElementSize() == 2);
                         for( auto i = 0u; i < FinalVertex.size(); ++i )
                         {
                             for (int j = 0; j < StreamInfo.m_VectorCount; ++j)
@@ -869,7 +880,7 @@ namespace xgeom_compiler
             m_FinalGeom.m_pDList    = nullptr;
         }
 
-        virtual void Compile( const xgeom_compiler::descriptor& CompilerOption ) override
+        void Compile( const xgeom_rsc::descriptor& CompilerOption )
         {
             if (CompilerOption.m_Cleanup.m_bForceAddColorIfNone) m_RawGeom.ForceAddColorIfNone();
             if (CompilerOption.m_Cleanup.m_bMergeMeshes) m_RawGeom.CollapseMeshes(CompilerOption.m_Cleanup.m_RenameMesh.c_str());
@@ -886,11 +897,72 @@ namespace xgeom_compiler
             GenerateFinalMesh(CompilerOption);
         }
 
-        virtual void Serialize(const std::string_view FilePath) override
+        xerr onCompile(void) noexcept override
         {
-            xcore::serializer::stream Stream;
-            if( auto Err = Stream.Save( xcore::string::To<wchar_t>(FilePath), m_FinalGeom, {}, false ); Err )
-                throw(std::runtime_error( xcore::string::Fmt("Failed to serialize geometry (%s)", Err.getCode().m_pString).data() ));
+            xgeom_rsc::descriptor Descriptor;
+
+            //
+            // Read the descriptor file...
+            //
+            {
+                xproperty::settings::context    Context{};
+                auto                            DescriptorFileName = std::format(L"{}/{}/Descriptor.txt", m_ProjectPaths.m_Project, m_InputSrcDescriptorPath);
+
+                if ( auto Err = Descriptor.Serialize(true, DescriptorFileName, Context); Err)
+                    return Err;
+            }
+
+            //
+            // Do a quick validation of the descriptor
+            //
+            //if (auto Err = DoValidation(); Err)
+           //     return Err;
+
+
+            //
+            // Load the source data
+            //
+            LoadRaw(std::format(L"{}/{}", m_ProjectPaths.m_Assets, Descriptor.m_Main.m_MeshAsset));
+
+            //
+            // OK Time to compile
+            //
+            Compile(Descriptor);
+
+            //
+            // Export
+            //
+            int Count = 0;
+            for (auto& T : m_Target)
+            {
+                displayProgressBar("Serializing", Count++ / (float)m_Target.size());
+
+                if (T.m_bValid)
+                {
+                    Serialize(T.m_DataPath);
+                }
+            }
+            displayProgressBar("Serializing", 1);
+
+            return {};
+        }
+
+
+        void Serialize(const std::wstring_view FilePath)
+        {
+            xserializer::stream Serializer;
+            if( auto Err = Serializer.Save
+                ( FilePath
+                , m_FinalGeom
+                , m_OptimizationType == optimization_type::O0     ? xserializer::compression_level::FAST
+                    : m_OptimizationType == optimization_type::O1 ? xserializer::compression_level::MEDIUM
+                    : xserializer::compression_level::HIGH
+                ); Err )
+            {
+                throw(std::runtime_error(std::string(Err.getMessage())));
+            }
+                
+
         }
 
         meshopt_VertexCacheStatistics   m_VertCacheAMDStats;
@@ -907,7 +979,7 @@ namespace xgeom_compiler
 
     //------------------------------------------------------------------------------------
 
-    std::unique_ptr<instance> MakeInstance()
+    std::unique_ptr<instance> instance::Create(void)
     {
         return std::make_unique<implementation>();
     }

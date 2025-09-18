@@ -1,18 +1,17 @@
-#ifndef XGEOM_COMPILER_RUNTIME_HPP
-#define XGEOM_COMPILER_RUNTIME_HPP
+#ifndef XGEOM_RUNTIME_H
+#define XGEOM_RUNTIME_H
+#pragma once
 
-#include "xcore.h"
+#include "dependencies/xmath/source/xmath_fshapes.h"
+#include "dependencies/xserializer/source/xserializer.h"
 
 struct xgeom
 {
-    enum
-    {
-        VERSION = 1
-    };
+    inline static constexpr auto xserializer_version_v = 1;
 
     struct bone
     {
-        xcore::bbox             m_BBox;
+        xmath::fbbox            m_BBox;
     };
 
     struct lod
@@ -26,7 +25,7 @@ struct xgeom
     {
         std::array<char, 32>    m_Name;
         float                   m_WorldPixelSize;   // Average World Pixel size for this SubMesh
-        xcore::bbox             m_BBox;
+        xmath::fbbox            m_BBox;
         std::uint16_t           m_nLODs;
         std::uint16_t           m_iLOD;
     };
@@ -134,25 +133,25 @@ struct xgeom
 
         constexpr static const auto vector_info_v = []() consteval noexcept
         {
-            std::array<vector_info, (int)format::ENUM_COUNT > Info{};
-            Info[(int)format::FLOAT_1D]              = vector_info{ .m_Dimensions = 1, .m_ElementSize = sizeof(float),          .m_bInt = false, .m_bSigned = true,  .m_bNormalized = false };
-            Info[(int)format::FLOAT_2D]              = vector_info{ .m_Dimensions = 2, .m_ElementSize = sizeof(float),          .m_bInt = false, .m_bSigned = true,  .m_bNormalized = false };
-            Info[(int)format::FLOAT_3D]              = vector_info{ .m_Dimensions = 3, .m_ElementSize = sizeof(float),          .m_bInt = false, .m_bSigned = true,  .m_bNormalized = false };
-            Info[(int)format::FLOAT_4D]              = vector_info{ .m_Dimensions = 4, .m_ElementSize = sizeof(float),          .m_bInt = false, .m_bSigned = true,  .m_bNormalized = false };
-            Info[(int)format::UINT8_1D_NORMALIZED]   = vector_info{ .m_Dimensions = 1, .m_ElementSize = sizeof(std::uint8_t),   .m_bInt = true,  .m_bSigned = false, .m_bNormalized = true  };
-            Info[(int)format::UINT8_4D_NORMALIZED]   = vector_info{ .m_Dimensions = 4, .m_ElementSize = sizeof(std::uint8_t),   .m_bInt = true,  .m_bSigned = false, .m_bNormalized = true  };
-            Info[(int)format::UINT8_1D]              = vector_info{ .m_Dimensions = 1, .m_ElementSize = sizeof(std::uint8_t),   .m_bInt = true,  .m_bSigned = false, .m_bNormalized = false };
-            Info[(int)format::UINT16_1D]             = vector_info{ .m_Dimensions = 1, .m_ElementSize = sizeof(std::uint16_t),  .m_bInt = true,  .m_bSigned = false, .m_bNormalized = false };
-            Info[(int)format::UINT32_1D]             = vector_info{ .m_Dimensions = 1, .m_ElementSize = sizeof(std::uint32_t),  .m_bInt = true,  .m_bSigned = false, .m_bNormalized = false };
-            Info[(int)format::SINT8_3D_NORMALIZED]   = vector_info{ .m_Dimensions = 3, .m_ElementSize = sizeof(std::uint8_t),   .m_bInt = true,  .m_bSigned = false, .m_bNormalized = true  };
+            std::array<vector_info, static_cast<int>(format::ENUM_COUNT) > Info{};
+            Info[static_cast<int>(format::FLOAT_1D)]              = vector_info{ .m_Dimensions = 1, .m_ElementSize = sizeof(float),          .m_bInt = false, .m_bSigned = true,  .m_bNormalized = false };
+            Info[static_cast<int>(format::FLOAT_2D)]              = vector_info{ .m_Dimensions = 2, .m_ElementSize = sizeof(float),          .m_bInt = false, .m_bSigned = true,  .m_bNormalized = false };
+            Info[static_cast<int>(format::FLOAT_3D)]              = vector_info{ .m_Dimensions = 3, .m_ElementSize = sizeof(float),          .m_bInt = false, .m_bSigned = true,  .m_bNormalized = false };
+            Info[static_cast<int>(format::FLOAT_4D)]              = vector_info{ .m_Dimensions = 4, .m_ElementSize = sizeof(float),          .m_bInt = false, .m_bSigned = true,  .m_bNormalized = false };
+            Info[static_cast<int>(format::UINT8_1D_NORMALIZED)]   = vector_info{ .m_Dimensions = 1, .m_ElementSize = sizeof(std::uint8_t),   .m_bInt = true,  .m_bSigned = false, .m_bNormalized = true  };
+            Info[static_cast<int>(format::UINT8_4D_NORMALIZED)]   = vector_info{ .m_Dimensions = 4, .m_ElementSize = sizeof(std::uint8_t),   .m_bInt = true,  .m_bSigned = false, .m_bNormalized = true  };
+            Info[static_cast<int>(format::UINT8_1D)]              = vector_info{ .m_Dimensions = 1, .m_ElementSize = sizeof(std::uint8_t),   .m_bInt = true,  .m_bSigned = false, .m_bNormalized = false };
+            Info[static_cast<int>(format::UINT16_1D)]             = vector_info{ .m_Dimensions = 1, .m_ElementSize = sizeof(std::uint16_t),  .m_bInt = true,  .m_bSigned = false, .m_bNormalized = false };
+            Info[static_cast<int>(format::UINT32_1D)]             = vector_info{ .m_Dimensions = 1, .m_ElementSize = sizeof(std::uint32_t),  .m_bInt = true,  .m_bSigned = false, .m_bNormalized = false };
+            Info[static_cast<int>(format::SINT8_3D_NORMALIZED)]   = vector_info{ .m_Dimensions = 3, .m_ElementSize = sizeof(std::uint8_t),   .m_bInt = true,  .m_bSigned = false, .m_bNormalized = true  };
             return Info;
         }();
 
         constexpr std::uint32_t getSize             ( void ) const noexcept { return getVectorSize() * getVectorCount(); }
-        constexpr std::uint32_t getVectorSize       ( void ) const noexcept { return vector_info_v[(int)m_Format].m_ElementSize * getVectorDimension(); }
-        constexpr std::uint32_t getVectorElementSize( void ) const noexcept { return vector_info_v[(int)m_Format].m_ElementSize; }
+        constexpr std::uint32_t getVectorSize       ( void ) const noexcept { return vector_info_v[static_cast<int>(m_Format)].m_ElementSize * getVectorDimension(); }
+        constexpr std::uint32_t getVectorElementSize( void ) const noexcept { return vector_info_v[static_cast<int>(m_Format)].m_ElementSize; }
         constexpr std::uint32_t getVectorCount      ( void ) const noexcept { return m_VectorCount; }
-        constexpr std::uint32_t getVectorDimension  ( void ) const noexcept { return vector_info_v[(int)m_Format].m_Dimensions; }
+        constexpr std::uint32_t getVectorDimension  ( void ) const noexcept { return vector_info_v[static_cast<int>(m_Format)].m_Dimensions; }
 
         element_def     m_ElementsType;
         format          m_Format;              // Format
@@ -166,7 +165,7 @@ struct xgeom
     //-------------------------------------------------------------------------
             
                     xgeom                       ( void ) = default;
-    inline          xgeom                       ( xcore::serializer::stream& Steaming ) noexcept;
+    inline          xgeom                       ( xserializer::stream& Steaming ) noexcept;
     inline 
     int             getFaceCount                ( void ) const noexcept;
     inline 
@@ -204,7 +203,7 @@ struct xgeom
     std::byte*                                      m_pData;
     std::uint32_t                                   m_DataSize;
     std::array<std::uint32_t, max_stream_count_v>   m_Stream;
-    xcore::bbox                                     m_BBox;
+    xmath::fbbox                                    m_BBox;
     std::uint32_t                                   m_nIndices;
     std::uint32_t                                   m_nVertices;
     std::uint16_t                                   m_nLODs;
@@ -222,7 +221,7 @@ struct xgeom
 
 //-------------------------------------------------------------------------
 
-xgeom::xgeom(xcore::serializer::stream& Steaming) noexcept
+xgeom::xgeom(xserializer::stream& Steaming) noexcept
 {
     //xassert( Steaming.getResourceVersion() == xgeom::VERSION );
 }
@@ -288,7 +287,7 @@ bool xgeom::hasSeparatedPositions(void) const noexcept
 
 int xgeom::getVertexSize(int iStream)  const noexcept
 {
-    xassert(iStream < m_nStreams);
+    assert(iStream < m_nStreams);
     if (m_CompactedVertexSize)
     {
         if (m_nStreams == 3)
@@ -298,7 +297,7 @@ int xgeom::getVertexSize(int iStream)  const noexcept
         }
         else
         {
-            xassert(m_nStreams == 2);
+            assert(m_nStreams == 2);
             return m_CompactedVertexSize;
         }
     }
@@ -312,7 +311,7 @@ int xgeom::getVertexSize(int iStream)  const noexcept
 
 std::uint32_t xgeom::getStreamSize(int iStream) const noexcept
 {
-    xassert(iStream < m_nStreams);
+    assert(iStream < m_nStreams);
     if (iStream == 0 || isStreamBased()) return m_StreamInfo[iStream].getSize() * (iStream == 0 ? m_nIndices : m_nVertices);
     if (m_nStreams == 3) return m_nVertices * ((iStream == 1) ? m_StreamInfo[1].getSize() : static_cast<std::uint32_t>(m_CompactedVertexSize));
     return static_cast<std::uint32_t>(m_CompactedVertexSize) * m_nVertices;
@@ -322,7 +321,7 @@ std::uint32_t xgeom::getStreamSize(int iStream) const noexcept
 
 std::byte* xgeom::getStreamData(int iStream) noexcept
 {
-    xassert(iStream < m_nStreams);
+    assert(iStream < m_nStreams);
     return m_pData + m_Stream[iStream];
 }
 
@@ -330,7 +329,7 @@ std::byte* xgeom::getStreamData(int iStream) noexcept
 
 std::byte* xgeom::getStreamInfoData(int iStreamInfo) noexcept
 {
-    xassert(iStreamInfo < m_nStreamInfos);
+    assert(iStreamInfo < m_nStreamInfos);
     return getStreamData(m_StreamInfo[iStreamInfo].m_iStream) + m_StreamInfo[iStreamInfo].m_Offset;
 }
 
@@ -346,12 +345,12 @@ int xgeom::getStreamInfoStride(int iStreamInfo) noexcept
 //-------------------------------------------------------------------------
 // serializer
 //-------------------------------------------------------------------------
-namespace xcore::serializer::io_functions
+namespace xserializer::io_functions
 {
     //-------------------------------------------------------------------------
 
     template<>
-    xcore::err SerializeIO<xgeom::stream_info::element_def>(xcore::serializer::stream& Stream, const xgeom::stream_info::element_def& ElementDef ) noexcept
+    xerr SerializeIO<xgeom::stream_info::element_def>(xserializer::stream& Stream, const xgeom::stream_info::element_def& ElementDef ) noexcept
     {
         return Stream.Serialize(ElementDef.m_Value);
     }
@@ -359,9 +358,9 @@ namespace xcore::serializer::io_functions
     //-------------------------------------------------------------------------
 
     template<>
-    xcore::err SerializeIO<xgeom::bone>(xcore::serializer::stream& Stream, const xgeom::bone& Bone ) noexcept
+    xerr SerializeIO<xgeom::bone>(xserializer::stream& Stream, const xgeom::bone& Bone ) noexcept
     {
-        xcore::err Err;
+        xerr Err;
         false
         || (Err = Stream.Serialize(Bone.m_BBox.m_Min.m_X    ))
         || (Err = Stream.Serialize(Bone.m_BBox.m_Min.m_Y    ))
@@ -376,9 +375,9 @@ namespace xcore::serializer::io_functions
     //-------------------------------------------------------------------------
 
     template<>
-    xcore::err SerializeIO<xgeom::lod>(xcore::serializer::stream& Stream, const xgeom::lod& Lod ) noexcept
+    xerr SerializeIO<xgeom::lod>(xserializer::stream& Stream, const xgeom::lod& Lod ) noexcept
     {
-        xcore::err Err;
+        xerr Err;
         false
         || (Err = Stream.Serialize(Lod.m_ScreenArea     ))
         || (Err = Stream.Serialize(Lod.m_iSubmesh       ))
@@ -390,9 +389,9 @@ namespace xcore::serializer::io_functions
     //-------------------------------------------------------------------------
 
     template<>
-    xcore::err SerializeIO<xgeom::mesh>(xcore::serializer::stream& Stream, const xgeom::mesh& Mesh ) noexcept
+    xerr SerializeIO<xgeom::mesh>(xserializer::stream& Stream, const xgeom::mesh& Mesh ) noexcept
     {
-        xcore::err Err;
+        xerr Err;
         false
         || (Err = Stream.Serialize(Mesh.m_Name              ))
         || (Err = Stream.Serialize(Mesh.m_WorldPixelSize    ))
@@ -411,9 +410,9 @@ namespace xcore::serializer::io_functions
     //-------------------------------------------------------------------------
 
     template<>
-    xcore::err SerializeIO<xgeom::submesh>(xcore::serializer::stream& Stream, const xgeom::submesh& Submesh ) noexcept
+    xerr SerializeIO<xgeom::submesh>(xserializer::stream& Stream, const xgeom::submesh& Submesh ) noexcept
     {
-        xcore::err Err;
+        xerr Err;
         false
         || (Err = Stream.Serialize(Submesh.m_BaseSortKey ))
         || (Err = Stream.Serialize(Submesh.m_iIndex      ))
@@ -428,9 +427,9 @@ namespace xcore::serializer::io_functions
     //-------------------------------------------------------------------------
 
     template<>
-    xcore::err SerializeIO<xgeom::cmd>(xcore::serializer::stream& Stream, const xgeom::cmd& Cmd ) noexcept
+    xerr SerializeIO<xgeom::cmd>(xserializer::stream& Stream, const xgeom::cmd& Cmd ) noexcept
     {
-        xcore::err Err;
+        xerr Err;
         false
         || (Err = Stream.Serialize( Cmd.m_Type))
         || (Err = Stream.Serialize( Cmd.m_ArgX))
@@ -441,9 +440,9 @@ namespace xcore::serializer::io_functions
     //-------------------------------------------------------------------------
 
     template<>
-    xcore::err SerializeIO<xgeom::stream_info>(xcore::serializer::stream& Stream, const xgeom::stream_info& StreamInfo ) noexcept
+    xerr SerializeIO<xgeom::stream_info>(xserializer::stream& Stream, const xgeom::stream_info& StreamInfo ) noexcept
     {
-        xcore::err Err;
+        xerr Err;
         false
         || (Err = Stream.Serialize( StreamInfo.m_ElementsType   ))
         || (Err = Stream.Serialize(StreamInfo.m_Format          ))
@@ -457,16 +456,16 @@ namespace xcore::serializer::io_functions
     //-------------------------------------------------------------------------
 
     template<>
-    xcore::err SerializeIO<xgeom>(xcore::serializer::stream& Stream, const xgeom& Geom ) noexcept
+    xerr SerializeIO<xgeom>(xserializer::stream& Stream, const xgeom& Geom ) noexcept
     {
-        xcore::err Err;
+        xerr Err;
         false
         || (Err = Stream.Serialize( Geom.m_pBone,    Geom.m_nBones          ))
         || (Err = Stream.Serialize( Geom.m_pMesh,    Geom.m_nMeshes         ))
         || (Err = Stream.Serialize( Geom.m_pSubMesh, Geom.m_nSubMeshs       ))
         || (Err = Stream.Serialize( Geom.m_pLOD,     Geom.m_nLODs           ))
         || (Err = Stream.Serialize( Geom.m_pDList,   Geom.m_nDisplayLists   ))
-        || (Err = Stream.Serialize( Geom.m_pData,    Geom.m_DataSize, mem_type::Flags(mem_type::flags::UNIQUE)))
+        || (Err = Stream.Serialize( Geom.m_pData,    Geom.m_DataSize, xserializer::mem_type{ .m_bUnique = true } ))
         || (Err = Stream.Serialize( Geom.m_DataSize             ))
         || (Err = Stream.Serialize( Geom.m_Stream               ))
         || (Err = Stream.Serialize( Geom.m_BBox.m_Min.m_X       ))
@@ -488,11 +487,7 @@ namespace xcore::serializer::io_functions
         ;
         return Err;
     }
-
-    //-------------------------------------------------------------------------
-
 }
-
 
 #endif
 

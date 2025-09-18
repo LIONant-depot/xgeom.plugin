@@ -1,3 +1,0 @@
-
-// Configurations should match or else you will have a bad time...
-#include "../../Dependencies/assimp/BINARIES/Win32/include/assimp/config.h"
