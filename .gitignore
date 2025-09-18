@@ -351,3 +351,4 @@ MigrationBackup/
 /dependencies
 /build/xGeomCompiler.vs2019/ResourcePipeline.config
 /build/xGeomCompiler.vs2019/ResourceDesc.txt
+/build/xgeom_compiler.vs2022
