@@ -5,11 +5,11 @@
 [ xProperties : 8 ]
 { Name:s                            Value:?                   }
 //--------------------------------  -------------------------
-  "PipelinePlugin/TypeName"                  ;string "Texture"    
-  "PipelinePlugin/FileExtension"             ;wstring "xbmp"               
-  "PipelinePlugin/TypeGUID/Value"            ;u64    #6701d481518bd833
+  "PipelinePlugin/TypeName"                  ;string "Geom"    
+  "PipelinePlugin/FileExtension"             ;wstring "xgeom"               
+  "PipelinePlugin/TypeGUID/Value"            ;u64    #ACF12D9846BBD97F
   "PipelinePlugin/Icon"                      ;string "\xEE\xAE\x9F"        
   "PipelinePlugin/Details/RunAfter[]"        ;s64    0                
   "PipelinePlugin/Details/CompilationScript" ;wstring "Build\\CreateAndBuildProject.bat"
-  "PipelinePlugin/Details/DebugCompiler"     ;wstring "Build\\xtexture_compiler.vs2022\\Debug\\xtexture_compiler.exe"               
-  "PipelinePlugin/Details/ReleaseCompiler"   ;wstring "Build\\xtexture_compiler.vs2022\\Release\\xtexture_compiler.exe"               
+  "PipelinePlugin/Details/DebugCompiler"     ;wstring "Build\\xgeom_compiler.vs2022\\Debug\\xtexture_compiler.exe"               
+  "PipelinePlugin/Details/ReleaseCompiler"   ;wstring "Build\\xgeom_compiler.vs2022\\Release\\xtexture_compiler.exe"               

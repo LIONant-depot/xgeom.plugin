@@ -30,4 +30,15 @@ source_group("Geom_Compiler" FILES
 
 add_subdirectory("build/dependency" "${CMAKE_CURRENT_BINARY_DIR}/xgeom_compiler")
 
+
+# copy the assimp dll into the project
+file(COPY ${CMAKE_SOURCE_DIR}/dependencies/assimp/BINARIES/Win32/bin/Release/assimp-vc143-mt.dll
+     DESTINATION ${CMAKE_BINARY_DIR})
+
+file(COPY ${CMAKE_SOURCE_DIR}/dependencies/assimp/BINARIES/Win32/bin/Release/assimp-vc143-mt.dll
+     DESTINATION ${CMAKE_BINARY_DIR}/Release)
+
+file(COPY ${CMAKE_SOURCE_DIR}/dependencies/assimp/BINARIES/Win32/bin/Release/assimp-vc143-mt.dll
+     DESTINATION ${CMAKE_BINARY_DIR}/Debug)
+
 ProcessComponents()
