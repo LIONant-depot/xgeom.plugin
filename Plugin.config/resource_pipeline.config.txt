@@ -10,6 +10,6 @@
   "PipelinePlugin/TypeGUID/Value"            ;u64    #ACF12D9846BBD97F
   "PipelinePlugin/Icon"                      ;string "\xEE\xAE\x9F"        
   "PipelinePlugin/Details/RunAfter[]"        ;s64    0                
-  "PipelinePlugin/Details/CompilationScript" ;wstring "Build\\CreateAndBuildProject.bat"
-  "PipelinePlugin/Details/DebugCompiler"     ;wstring "Build\\xgeom_compiler.vs2022\\Debug\\xtexture_compiler.exe"               
-  "PipelinePlugin/Details/ReleaseCompiler"   ;wstring "Build\\xgeom_compiler.vs2022\\Release\\xtexture_compiler.exe"               
+  "PipelinePlugin/Details/CompilationScript" ;wstring "Cache\\Plugins\\xgeom.plugin\\Build\\CreateAndBuildProject.bat"
+  "PipelinePlugin/Details/DebugCompiler"     ;wstring "Cache\\Plugins\\xgeom.plugin\\Build\\xgeom_compiler.vs2022\\Debug\\xtexture_compiler.exe"               
+  "PipelinePlugin/Details/ReleaseCompiler"   ;wstring "Cache\\Plugins\\xgeom.plugin\\Build\\xgeom_compiler.vs2022\\Release\\xtexture_compiler.exe"               
