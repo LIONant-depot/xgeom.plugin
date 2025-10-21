@@ -10,6 +10,8 @@
 #include "../xgeom_rsc_descriptor.h"
 #include "../xgeom.h"
 
+#include "dependencies/xproperty/source/xcore/my_properties.cpp"
+
 namespace xgeom_compiler
 {
     struct implementation : xgeom_compiler::instance
