@@ -8,6 +8,9 @@ namespace xgeom_rsc
     // So while generating the type guid we must treat it as an instance.
     inline static constexpr auto resource_type_guid_v = xresource::type_guid(xresource::guid_generator::Instance64FromString("geom"));
 
+    static constexpr wchar_t mesh_filter_v[]        = L"Mesh\0 *.fbx; *.obj\0Any Thing\0 *.*\0";
+    static constexpr wchar_t skeleton_filter_v[]    = L"Skeleton\0 *.fbx\0Any Thing\0 *.*\0";
+
     struct main
     {
         std::wstring            m_MeshAsset         {};                             // File name of the mesh to load
@@ -16,8 +19,8 @@ namespace xgeom_rsc
 
         XPROPERTY_DEF
         ( "main", main
-        , obj_member<"MeshAsset", &main::m_MeshAsset >
-        , obj_member<"UseSkeletonFile", &main::m_UseSkeletonFile >
+        , obj_member<"MeshAsset",       &main::m_MeshAsset,         member_ui<std::wstring>::file_dialog<mesh_filter_v,     true, 1>  >
+        , obj_member<"UseSkeletonFile", &main::m_UseSkeletonFile,   member_ui<std::wstring>::file_dialog<skeleton_filter_v, true, 1> >
         )
     };
     XPROPERTY_REG(main)
