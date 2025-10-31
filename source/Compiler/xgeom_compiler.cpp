@@ -924,7 +924,7 @@ namespace xgeom_compiler
             //
             // Load the source data
             //
-            LoadRaw(std::format(L"{}/{}", m_ProjectPaths.m_Assets, Descriptor.m_Main.m_MeshAsset));
+            LoadRaw(std::format(L"{}/{}", m_ProjectPaths.m_Project, Descriptor.m_Main.m_MeshAsset));
 
             //
             // OK Time to compile

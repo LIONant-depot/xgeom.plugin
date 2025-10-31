@@ -24,13 +24,13 @@ int main( int argc, const char* argv[] )
         static const char* pDebugArgs[] =
         { "TextureCompiler"
         , "-PROJECT"
-        , "D:\\LIONant\\xGPU\\dependencies\\xtexture.plugin\\bin\\example.lion_project"
+        , "D:\\LIONant\\xGPU\\example.lionprj"
         , "-DEBUG"
         , "D1"
         , "-DESCRIPTOR"
-        , "Descriptors\\Texture\\D7\\00\\189E8EEFD88400D7.desc"
+        , "Descriptors\\Geom\\05\\00\\B2295861246D0005.desc"
         , "-OUTPUT"
-        , "D:\\LIONant\\xGPU\\dependencies\\xtexture.plugin\\bin\\example.lion_project\\Cache\\Resources\\Platforms"
+        , "D:\\LIONant\\xGPU\\example.lionprj\\Cache\\Resources\\Platforms\\WINDOWS"
         };
 
         argv = pDebugArgs;
