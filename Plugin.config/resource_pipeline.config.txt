@@ -2,13 +2,14 @@
 // New Types
 < s32:d u32:g s16:C u16:H s8:c u8:h f32:f f64:F string:s wstring:S u64:G s64:D bool:c enum:s >
 
-[ xProperties : 8 ]
+[ xProperties : 9 ]
 { Name:s                            Value:?                   }
 //--------------------------------  -------------------------
   "PipelinePlugin/TypeName"                  ;string "Geom"    
   "PipelinePlugin/FileExtension"             ;wstring "xgeom"               
   "PipelinePlugin/TypeGUID/Value"            ;u64    #ACF12D9846BBD97F
-  "PipelinePlugin/IconPath"                      ;wstring "icon.png"
+  "PipelinePlugin/IconPaths[]"                      ;s64    1
+  "PipelinePlugin/IconPaths[G:0]"                      ;wstring "icon.png"
   "PipelinePlugin/Details/RunAfter[]"        ;s64    0                
   "PipelinePlugin/Details/CompilationScript" ;wstring "Cache\\Plugins\\xgeom.plugin\\Build\\CreateAndBuildProject.bat"
   "PipelinePlugin/Details/DebugCompiler"     ;wstring "Cache\\Plugins\\xgeom.plugin\\Build\\xgeom_compiler.vs2022\\Debug\\xgeom_compiler.exe"               
