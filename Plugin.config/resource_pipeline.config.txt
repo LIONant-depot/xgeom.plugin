@@ -2,10 +2,12 @@
 // New Types
 < s32:d u32:g s16:C u16:H s8:c u8:h f32:f f64:F string:s wstring:S u64:G s64:D bool:c enum:s >
 
-[ xProperties : 9 ]
+[ xProperties : 11 ]
 { Name:s                            Value:?                   }
 //--------------------------------  -------------------------
   "PipelinePlugin/TypeName"                  ;string "Geom"    
+  "PipelinePlugin/Group"                     ;string "Geometry"
+  "PipelinePlugin/Description"               ;string "The compiled mesh data: made by the static and skin geometry compilers."
   "PipelinePlugin/FileExtension"             ;wstring "xgeom"               
   "PipelinePlugin/TypeGUID/Value"            ;u64    #ACF12D9846BBD97F
   "PipelinePlugin/IconPaths[]"                      ;s64    1
