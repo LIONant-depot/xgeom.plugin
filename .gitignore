@@ -352,3 +352,5 @@ MigrationBackup/
 /build/xGeomCompiler.vs2019/ResourcePipeline.config
 /build/xGeomCompiler.vs2019/ResourceDesc.txt
 /build/xgeom_compiler.vs2022
+# Linux: native compiler builds (xLION root CMakeLists.txt, xlion_compilers) and the dependencies link
+/Build/*_compiler.linux/

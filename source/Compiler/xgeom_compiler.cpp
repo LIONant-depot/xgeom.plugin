@@ -640,7 +640,8 @@ namespace xgeom_compiler
             // Compute the size of the buffer
             //
             constexpr auto max_aligment_v = 16;
-            using max_align_byte = std::byte alignas(max_aligment_v);
+            using max_align_byte = std::byte;     // new[] storage is __STDCPP_DEFAULT_NEW_ALIGNMENT__ aligned (16 on x64)
+            static_assert(__STDCPP_DEFAULT_NEW_ALIGNMENT__ >= max_aligment_v);
             m_FinalGeom.m_DataSize  = 0;
             m_FinalGeom.m_Stream[0] = 0;
             for (int i = 0; i < m_FinalGeom.m_nStreams; ++i)
