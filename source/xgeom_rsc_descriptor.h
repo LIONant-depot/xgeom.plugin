@@ -8,7 +8,7 @@ namespace xgeom_rsc
     // So while generating the type guid we must treat it as an instance.
     inline static constexpr auto resource_type_guid_v = xresource::type_guid(xresource::guid_generator::Instance64FromString("geom"));
 
-    static constexpr wchar_t mesh_filter_v[]        = L"Mesh\0 *.fbx; *.obj\0Any Thing\0 *.*\0";
+    static constexpr wchar_t mesh_filter_v[]        = L"Mesh\0 *.fbx; *.obj; *.blend\0Any Thing\0 *.*\0";
     static constexpr wchar_t skeleton_filter_v[]    = L"Skeleton\0 *.fbx\0Any Thing\0 *.*\0";
 
     struct main
