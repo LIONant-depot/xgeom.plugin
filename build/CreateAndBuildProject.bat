@@ -2,7 +2,7 @@
 setlocal
 
 rem calls cmake to build the project
-call CreateProject.bat "return"
+call "%~dp0CreateProject.bat" "return"
 if errorlevel 1 (
     echo Project creation failed.
     goto DONE:
